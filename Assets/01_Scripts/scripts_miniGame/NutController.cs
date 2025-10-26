@@ -1,16 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class NutController : MonoBehaviour
 {
-    public float moveSpeed = 5f;       // velocidad base (ajusta desde el Inspector)
-    public float smoothTime = 0.2f;    // tiempo de suavizado (mayor = más lento)
-    public float stopDistance = 0.1f;  // distancia mínima al cursor antes de detenerse
+    public float moveSpeed = 5f;
+    public float smoothTime = 0.2f;
+    public float stopDistance = 0.1f;
 
     private Rigidbody2D rb;
-    private Vector2 currentVelocity;   // usado por SmoothDamp
+    private Vector2 currentVelocity;
     private Vector2 targetPos;
 
     void Awake()
@@ -21,7 +21,7 @@ public class NutController : MonoBehaviour
 
     void Update()
     {
-        // convertir posición del mouse a mundo
+        // actualizar posiciÃ³n objetivo del mouse
         Vector3 mouseWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorld.z = 0f;
         targetPos = mouseWorld;
@@ -29,21 +29,32 @@ public class NutController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // calcula distancia actual
+        if (BlockTimer.IsBlocked)
+        {
+            rb.velocity = Vector2.zero;
+            rb.isKinematic = true; // âŒ Congela fÃ­sicas y colisiones
+            return;
+        }
+        else
+        {
+            rb.isKinematic = false; // âœ… Rehabilita fÃ­sicas cuando termina bloqueo
+        }
+
         float distance = Vector2.Distance(rb.position, targetPos);
 
         if (distance > stopDistance)
         {
-            // movimiento más suave y menos brusco que MoveTowards
             Vector2 newPos = Vector2.SmoothDamp(rb.position, targetPos, ref currentVelocity, smoothTime, moveSpeed);
             rb.MovePosition(newPos);
         }
         else
         {
-            // detiene el movimiento si ya está cerca del cursor
             rb.velocity = Vector2.zero;
         }
     }
+
+
 }
+
 
 
